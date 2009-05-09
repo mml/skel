@@ -1,0 +1,6 @@
+#! /bin/sh -ve
+touch $1
+chmod +x $1
+exec ${EDITOR:-vi} $1
+
+# Ganked from ryan.king@socialtext.com.

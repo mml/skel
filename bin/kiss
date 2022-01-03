@@ -1,6 +1,35 @@
-#! /bin/sh -ve
+#!/bin/zsh -f
+# kiss: begin editing an executable script
+
+# kiss ~/bin/foo
+#   foo will be empty
+# kiss ~/bin/bar ~/bin/foo
+#   foo will be a copy of bar
+# kiss python2.6 ~/bin/foo
+#   foo will begin with a #! line pointing to python2.6 full path
+
+if [[ $# -eq 1 && "$1" = 'l' ]] {
+  # Defensive stance against neofetch
+  exit 0
+}
+
+if [[ $# -gt 2 ]] {
+  >&2 echo "USAGE: kiss [src] script"
+  exit 64
+} elif [[ $# -eq 2 ]] {
+  src="$1"
+  shift
+}
+
+if [[ "$(head -c2 "$src" 2>&-)" = '#!' ]] {
+  cp -n "$src" "$1"
+} else {
+  cp -n =(echo "#!$(PATH="/bin:$PATH" whence -p "$src")") "$1"
+}
+
 touch $1
 chmod +x $1
 exec ${EDITOR:-vi} $1
 
-# Ganked from ryan.king@socialtext.com.
+# Matthew M. Liggett <mml@pobox.com>
+# Original idea Ryan King <ryan.king@socialtext.com>

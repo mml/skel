@@ -7,15 +7,27 @@
 #   foo will be a copy of bar
 # kiss python2.6 ~/bin/foo
 #   foo will begin with a #! line pointing to python2.6 full path
+# kiss env scheme ~/bin/foo
+#   foo will begin with '#!/usr/bin/env scheme'
 
 if [[ $# -eq 1 && "$1" = 'l' ]] {
   # Defensive stance against neofetch
   exit 0
 }
 
-if [[ $# -gt 2 ]] {
+usage() {
   >&2 echo "USAGE: kiss [src] script"
   exit 64
+}
+
+use_env=0
+if [[ "$1" = "env" ]] {
+  use_env=1
+  shift
+}
+
+if [[ $# -gt 2 ]] {
+  usage
 } elif [[ $# -eq 2 ]] {
   src="$1"
   shift
@@ -23,6 +35,8 @@ if [[ $# -gt 2 ]] {
 
 if [[ "$(head -c2 "$src" 2>&-)" = '#!' ]] {
   cp -n "$src" "$1"
+} elif [[ "$use_env" = "1" ]] {
+  cp -n =(echo "#!/usr/bin/env $src") "$1"
 } else {
   cp -n =(echo "#!$(PATH="/bin:$PATH" whence -p "$src")") "$1"
 }
